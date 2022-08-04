@@ -15,9 +15,14 @@ import {
 
 function PokemonInfo({pokemonName}) {
   // 🐨 Have state for the pokemon (null)
-  const [status, setStatus] = React.useState('idle')
-  const [pokemon, setPokemon] = React.useState(null)
-  const [error, setError] = React.useState(null)
+  // const [status, setStatus] = React.useState('idle')
+  // const [pokemon, setPokemon] = React.useState(null)
+  // const [error, setError] = React.useState(null)
+  const [state, setState] = React.useState({
+    status: 'idle',
+    pokemon: null,
+    error: null,
+  })
   // 🐨 use React.useEffect where the callback should be called whenever the
   // pokemon name changes.
 
@@ -25,32 +30,34 @@ function PokemonInfo({pokemonName}) {
     if (!pokemonName) {
       return
     }
-    setStatus('pending')
+    setState(prevState => ({...prevState, status: 'pending'}))
     fetchPokemon(pokemonName)
       .then(pokemonData => {
-        setPokemon(pokemonData)
-        setStatus('resolved')
+        setState(prevState => ({
+          ...prevState,
+          pokemon: pokemonData,
+          status: 'resolved',
+        }))
       })
       .catch(error => {
-        setError(error)
-        setStatus('rejected')
+        setState(prevState => ({...prevState, status: 'rejected', error}))
       })
   }, [pokemonName])
   // 💰 DON'T FORGET THE DEPENDENCIES ARRAY!
 
-  if (status === 'idle') {
+  if (state.status === 'idle') {
     return 'Submit a pokemon'
-  } else if (status === 'pending') {
+  } else if (state.status === 'pending') {
     return <PokemonInfoFallback name={pokemonName} />
-  } else if (status === 'rejected') {
+  } else if (state.status === 'rejected') {
     return (
       <div role="alert">
         There was an error:{' '}
-        <pre style={{whiteSpace: 'normal'}}>{error.message}</pre>
+        <pre style={{whiteSpace: 'normal'}}>{state.error.message}</pre>
       </div>
     )
-  } else if (status === 'resolved') {
-    return <PokemonDataView pokemon={pokemon} />
+  } else if (state.status=== 'resolved') {
+    return <PokemonDataView pokemon={state.pokemon} />
   }
 
   // 💰 if the pokemonName is falsy (an empty string) then don't bother making the request (exit early).
